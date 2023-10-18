@@ -4,7 +4,6 @@ pub extern crate bevy_turborand;
 use bevy::prelude::{App, Plugin, ResMut, Startup, Vec2};
 use bevy_mod_transform2d::{transform2d::Transform2d, Transform2dPlugin};
 
-use bevy_prototype_lyon::prelude::ShapePlugin;
 use bevy_rapier2d::prelude::{NoUserData, RapierConfiguration, RapierPhysicsPlugin};
 use bevy_turborand::prelude::RngPlugin;
 use stats::{Health, Knockback, Speed};
@@ -30,7 +29,6 @@ impl Plugin for TwinStickPlugin {
         app.add_plugins((
             RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(50.),
             Transform2dPlugin,
-            ShapePlugin,
             RngPlugin::default(),
         ));
 
