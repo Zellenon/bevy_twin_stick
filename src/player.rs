@@ -98,18 +98,21 @@ fn fire_player_weapons(
     weapons: Query<(Entity, &Weapon)>,
     players_children_query: Query<&Children, With<Player>>,
 ) {
-    for &child in players_children_query.single().iter() {
-        if let Ok((entity, weapon)) = weapons.get(child) {
-            let trigger_func = weapon.fire_mode;
-            if ((buttons.just_pressed(MouseButton::Left)
-                && trigger_func == WeaponFireMode::SemiAuto)
-                || (buttons.pressed(MouseButton::Left) && trigger_func == WeaponFireMode::FullAuto))
-                && weapon.can_fire
-            {
-                events.send(FireWeaponEvent {
-                    weapon: entity,
-                    target: None,
-                })
+    for parent_player in players_children_query.iter() {
+        for &child in parent_player.iter() {
+            if let Ok((entity, weapon)) = weapons.get(child) {
+                let trigger_func = weapon.fire_mode;
+                if ((buttons.just_pressed(MouseButton::Left)
+                    && trigger_func == WeaponFireMode::SemiAuto)
+                    || (buttons.pressed(MouseButton::Left)
+                        && trigger_func == WeaponFireMode::FullAuto))
+                    && weapon.can_fire
+                {
+                    events.send(FireWeaponEvent {
+                        weapon: entity,
+                        target: None,
+                    })
+                }
             }
         }
     }
