@@ -6,6 +6,7 @@ use bevy_mod_transform2d::{transform2d::Transform2d, Transform2dPlugin};
 
 use bevy_rapier2d::prelude::{NoUserData, RapierConfiguration, RapierPhysicsPlugin};
 use bevy_turborand::prelude::RngPlugin;
+use camera::CameraPlugin;
 use stats::{Health, Knockback, Speed};
 
 use self::{
@@ -15,6 +16,7 @@ use self::{
 
 pub mod actors;
 pub mod ai;
+pub mod camera;
 pub mod player;
 pub mod projectile;
 pub mod stats;
@@ -22,23 +24,37 @@ pub mod transform2d_mods;
 pub mod utils;
 pub mod weapons;
 
-pub struct TwinStickPlugin;
+pub struct TwinStickPlugin {
+    use_default_camera: bool,
+}
+
+impl Default for TwinStickPlugin {
+    fn default() -> Self {
+        TwinStickPlugin {
+            use_default_camera: true,
+        }
+    }
+}
 
 impl Plugin for TwinStickPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins((
             RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(50.),
-            Transform2dPlugin,
             RngPlugin::default(),
         ));
 
         app.add_plugins((
+            Transform2dPlugin,
             PlayerPlugin,
             ActorPlugin,
             WeaponPlugin,
             AIPlugin,
             ProjectilePlugin,
         ));
+
+        if self.use_default_camera {
+            app.add_plugins(CameraPlugin);
+        }
 
         app.register_type::<Transform2d>();
         app.register_type::<Speed>();
