@@ -1,6 +1,8 @@
 pub extern crate bevy_mod_transform2d;
 pub extern crate bevy_rapier2d;
 pub extern crate bevy_turborand;
+use std::marker::PhantomData;
+
 use bevy::prelude::{App, Plugin, ResMut, Startup, Vec2};
 use bevy_mod_transform2d::{transform2d::Transform2d, Transform2dPlugin};
 
@@ -31,23 +33,20 @@ pub struct TwinStickPlugin;
 
 impl Plugin for TwinStickPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(TwinStickToggleablePlugin::<DummyStates> {
-            use_default_camera: true,
-            active_states: vec![DummyStates::AlwaysActive],
-        });
+        app.add_plugins(TwinStickToggleablePlugin::<DummyStates>::default());
     }
 }
 
 pub struct TwinStickToggleablePlugin<T: PluginControlState> {
     pub use_default_camera: bool,
-    pub active_states: Vec<T>,
+    pub _p: PhantomData<T>,
 }
 
 impl<T: PluginControlState> Default for TwinStickToggleablePlugin<T> {
     fn default() -> Self {
         TwinStickToggleablePlugin {
             use_default_camera: true,
-            active_states: vec![T::default()],
+            _p: PhantomData,
         }
     }
 }
