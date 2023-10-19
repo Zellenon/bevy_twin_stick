@@ -7,16 +7,18 @@ use bevy_mod_transform2d::{transform2d::Transform2d, Transform2dPlugin};
 use bevy_rapier2d::prelude::{NoUserData, RapierConfiguration, RapierPhysicsPlugin};
 use bevy_turborand::prelude::RngPlugin;
 use camera::CameraPlugin;
+use meta_states::PluginControlState;
 use stats::{Health, Knockback, Speed};
 
 use self::{
-    actors::ActorPlugin, ai::AIPlugin, player::PlayerPlugin, projectile::ProjectilePlugin,
-    weapons::WeaponPlugin,
+    actors::ActorPlugin, ai::AIPlugin, meta_states::DummyStates, player::PlayerPlugin,
+    projectile::ProjectilePlugin, weapons::WeaponPlugin,
 };
 
 pub mod actors;
 pub mod ai;
 pub mod camera;
+pub mod meta_states;
 pub mod player;
 pub mod projectile;
 pub mod stats;
@@ -24,20 +26,35 @@ pub mod transform2d_mods;
 pub mod utils;
 pub mod weapons;
 
-pub struct TwinStickPlugin {
-    pub use_default_camera: bool,
+// Basically a convenience plugin you're expected to use until you refactor things to add TwinStickToggleablePlugin
+pub struct TwinStickPlugin;
+
+impl Plugin for TwinStickPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_plugins(TwinStickToggleablePlugin::<DummyStates> {
+            use_default_camera: true,
+            active_states: vec![DummyStates::AlwaysActive],
+        });
+    }
 }
 
-impl Default for TwinStickPlugin {
+pub struct TwinStickToggleablePlugin<T: PluginControlState> {
+    pub use_default_camera: bool,
+    pub active_states: Vec<T>,
+}
+
+impl<T: PluginControlState> Default for TwinStickToggleablePlugin<T> {
     fn default() -> Self {
-        TwinStickPlugin {
+        TwinStickToggleablePlugin {
             use_default_camera: true,
+            active_states: vec![T::default()],
         }
     }
 }
 
-impl Plugin for TwinStickPlugin {
+impl<T: PluginControlState> Plugin for TwinStickToggleablePlugin<T> {
     fn build(&self, app: &mut App) {
+        app.add_state::<T>();
         app.add_plugins((
             RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(50.),
             RngPlugin::default(),
@@ -45,11 +62,11 @@ impl Plugin for TwinStickPlugin {
 
         app.add_plugins((
             Transform2dPlugin,
-            PlayerPlugin,
-            ActorPlugin,
-            WeaponPlugin,
+            PlayerPlugin::<T>::default(),
+            ActorPlugin::<T>::default(),
+            WeaponPlugin::<T>::default(),
             AIPlugin,
-            ProjectilePlugin,
+            ProjectilePlugin::<T>::default(),
         ));
 
         if self.use_default_camera {

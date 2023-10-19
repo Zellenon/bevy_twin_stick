@@ -11,4 +11,3 @@ bevy = {version = "0.11"}
 bevy_rapier2d = "0.22"
 bevy_mod_transform2d = { git = "https://github.com/Zellenon/bevy_mod_transform2d.git", features = ["bevy_rapier2d"] }
 bevy_turborand = "0.6"
-

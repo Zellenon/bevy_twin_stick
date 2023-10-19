@@ -14,7 +14,7 @@ use bevy_twin_stick::{
 pub fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut app = App::new();
     app.add_plugins(DefaultPlugins);
-    app.add_plugins(TwinStickPlugin::default());
+    app.add_plugins(TwinStickPlugin);
     app.add_plugins(RapierDebugRenderPlugin::default());
 
     app.add_systems(Startup, setup);

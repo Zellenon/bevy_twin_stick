@@ -1,8 +1,11 @@
+use std::marker::PhantomData;
+
+use crate::meta_states::PluginControlState;
 use crate::utils::*;
 use crate::weapons::{FireWeaponEvent, Weapon, WeaponFireMode};
 
 use bevy::prelude::{
-    App, Camera2dBundle, Children, Commands, Component, Entity, EventWriter, Input,
+    in_state, App, Camera2dBundle, Children, Commands, Component, Entity, EventWriter, Input,
     IntoSystemConfigs, MouseButton, Name, Plugin, Query, Res, Resource, Startup, Update, With,
 };
 use bevy::window::Window;
@@ -24,9 +27,12 @@ pub struct Cursor(pub Entity);
 #[derive(Component)]
 pub struct Player;
 
-pub struct PlayerPlugin;
+#[derive(Default)]
+pub struct PlayerPlugin<T: PluginControlState> {
+    _z: PhantomData<T>,
+}
 
-impl Plugin for PlayerPlugin {
+impl<T: PluginControlState> Plugin for PlayerPlugin<T> {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, player_setup);
         app.add_systems(
@@ -34,7 +40,8 @@ impl Plugin for PlayerPlugin {
             (
                 update_cursor_tracker,
                 fire_player_weapons.run_if(player_exists),
-            ),
+            )
+                .run_if(in_state(T::active_state())),
         );
     }
 }
