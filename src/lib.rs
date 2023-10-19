@@ -25,7 +25,7 @@ pub mod utils;
 pub mod weapons;
 
 pub struct TwinStickPlugin {
-    use_default_camera: bool,
+    pub use_default_camera: bool,
 }
 
 impl Default for TwinStickPlugin {
