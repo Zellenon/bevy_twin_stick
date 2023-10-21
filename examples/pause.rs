@@ -26,6 +26,8 @@ enum PauseState {
     Moving,
 }
 
+/// When the game is in this state, it will automatically enable all twin_stick functions.
+/// Otherwise, everything time-based in the library will pause.
 impl PluginControlState for PauseState {
     fn active_state() -> Self {
         PauseState::Moving
@@ -37,12 +39,12 @@ pub fn main() -> Result<(), Box<dyn std::error::Error>> {
     app.add_plugins(DefaultPlugins);
     app.add_plugins(RapierDebugRenderPlugin::default());
 
-    app.add_plugins(TwinStickToggleablePlugin::<PauseState>::default());
-    app.add_systems(OnEnter(PauseState::Locked), pause);
-    app.add_systems(OnEnter(PauseState::Moving), unpause);
+    app.add_plugins(TwinStickToggleablePlugin::<PauseState>::default().use_default_camera(false));
+    app.add_systems(OnEnter(PauseState::Locked), pause_physics);
+    app.add_systems(OnEnter(PauseState::Moving), unpause_physics);
 
     app.add_systems(Startup, setup);
-    app.add_systems(Update, toggle_camera_state);
+    app.add_systems(Update, toggle_pause);
 
     app.insert_resource(ClearColor(Color::rgb(
         0xA9 as f32 / 255.0,
@@ -74,25 +76,25 @@ fn setup(mut commands: Commands) {
     ));
 }
 
-pub(crate) fn toggle_camera_state(
+pub(crate) fn toggle_pause(
     keyboard_input: Res<Input<KeyCode>>,
-    mut camera_setting: ResMut<NextState<PauseState>>,
-    current_camera_setting: Res<State<PauseState>>,
+    mut pause_state: ResMut<NextState<PauseState>>,
+    current_pause_state: Res<State<PauseState>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::Space) {
         println!("Toggling Gamestate");
-        match current_camera_setting.get() {
-            PauseState::Locked => camera_setting.set(PauseState::Moving),
-            PauseState::Moving => camera_setting.set(PauseState::Locked),
+        match current_pause_state.get() {
+            PauseState::Locked => pause_state.set(PauseState::Moving),
+            PauseState::Moving => pause_state.set(PauseState::Locked),
         }
-        dbg!("Current gamestate", current_camera_setting.get());
+        dbg!("Current gamestate", current_pause_state.get());
     }
 }
 
-fn pause(mut physics: ResMut<RapierConfiguration>) {
+fn pause_physics(mut physics: ResMut<RapierConfiguration>) {
     (*physics).physics_pipeline_active = false;
 }
 
-fn unpause(mut physics: ResMut<RapierConfiguration>) {
+fn unpause_physics(mut physics: ResMut<RapierConfiguration>) {
     (*physics).physics_pipeline_active = true;
 }
