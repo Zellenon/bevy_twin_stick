@@ -51,6 +51,15 @@ impl<T: PluginControlState> Default for TwinStickToggleablePlugin<T> {
     }
 }
 
+impl<T: PluginControlState> TwinStickToggleablePlugin<T> {
+    pub fn use_default_camera(self, use_cam: bool) -> Self {
+        return TwinStickToggleablePlugin {
+            use_default_camera: use_cam,
+            ..self
+        };
+    }
+}
+
 impl<T: PluginControlState> Plugin for TwinStickToggleablePlugin<T> {
     fn build(&self, app: &mut App) {
         app.add_state::<T>();
