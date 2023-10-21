@@ -1,8 +1,11 @@
+use std::marker::PhantomData;
+
 use bevy::{
     math::Vec3Swizzles,
     prelude::{
-        App, Bundle, Changed, Commands, Component, ComputedVisibility, DespawnRecursiveExt, Entity,
-        GlobalTransform, Parent, Plugin, Query, Transform, Update, Vec2, Visibility, With, Without,
+        in_state, App, Bundle, Changed, Commands, Component, ComputedVisibility,
+        DespawnRecursiveExt, Entity, GlobalTransform, IntoSystemConfigs, Parent, Plugin, Query,
+        Transform, Update, Vec2, Visibility, With, Without,
     },
     reflect::Reflect,
 };
@@ -10,6 +13,7 @@ use bevy_mod_transform2d::transform2d::Transform2d;
 use bevy_rapier2d::prelude::*;
 
 use crate::{
+    meta_states::PluginControlState,
     player::Player,
     stats::{Health, Speed},
 };
@@ -103,11 +107,17 @@ impl Default for Legs {
     }
 }
 
-pub struct ActorPlugin;
+#[derive(Default)]
+pub struct ActorPlugin<T: PluginControlState> {
+    _z: PhantomData<T>,
+}
 
-impl Plugin for ActorPlugin {
+impl<T: PluginControlState> Plugin for ActorPlugin<T> {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (facing_update_system, animate_legs, health_death));
+        app.add_systems(
+            Update,
+            (facing_update_system, animate_legs, health_death).run_if(in_state(T::active_state())),
+        );
     }
 }
 

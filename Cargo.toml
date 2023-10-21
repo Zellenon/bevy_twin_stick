@@ -1,15 +1,13 @@
 [package]
-name = "twin_stick"
+name = "bevy_twin_stick"
 version = "0.2.0"
+authors = ["game", "game-logic", "bevy", "framework"]
 edition = "2021"
+readme = "README.md"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = {version = "0.11"} 
+bevy = {version = "0.11"}
 bevy_rapier2d = "0.22"
-bevy_mod_transform2d = { path = "bevy_mod_transform2d", features = ["bevy_rapier2d"] }
-bevy-inspector-egui = "0.20"
+bevy_mod_transform2d = { git = "https://github.com/Zellenon/bevy_mod_transform2d.git", features = ["bevy_rapier2d"] }
 bevy_turborand = "0.6"
-
-bevy_prototype_lyon = {version = "0.9"}

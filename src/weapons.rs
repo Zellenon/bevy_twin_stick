@@ -1,17 +1,27 @@
+use std::marker::PhantomData;
+
 use bevy::{
     prelude::{
-        App, Commands, Component, Entity, Event, EventReader, Parent, Plugin, Query, Res, Update,
-        With,
+        in_state, App, Commands, Component, Entity, Event, EventReader, IntoSystemConfigs, Parent,
+        Plugin, Query, Res, Update, With,
     },
     time::{Time, Timer, TimerMode},
 };
 use bevy_mod_transform2d::transform2d::Transform2d;
 
-use crate::player::CursorTracker;
+use crate::{meta_states::PluginControlState, player::CursorTracker};
 
-pub struct WeaponPlugin;
+pub struct WeaponPlugin<T: PluginControlState> {
+    _z: PhantomData<T>,
+}
 
-impl Plugin for WeaponPlugin {
+impl<T: PluginControlState> Default for WeaponPlugin<T> {
+    fn default() -> Self {
+        Self { _z: PhantomData }
+    }
+}
+
+impl<T: PluginControlState> Plugin for WeaponPlugin<T> {
     fn build(&self, app: &mut App) {
         app.add_event::<FireWeaponEvent>();
         app.add_systems(
@@ -21,7 +31,8 @@ impl Plugin for WeaponPlugin {
                 tick_cooldowns,
                 reset_weapon_cooldowns,
                 enable_weapons_on_cooldown,
-            ),
+            )
+                .run_if(in_state(T::active_state())),
         );
     }
 }

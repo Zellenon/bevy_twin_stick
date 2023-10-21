@@ -1,10 +1,10 @@
-use std::time::Duration;
+use std::{marker::PhantomData, time::Duration};
 
 use bevy::{
     prelude::{
-        App, Bundle, Commands, Component, ComputedVisibility, DespawnRecursiveExt, Entity, Event,
-        EventReader, EventWriter, GlobalTransform, Plugin, Query, Res, Transform, Update, Vec2,
-        Visibility,
+        in_state, App, Bundle, Commands, Component, ComputedVisibility, DespawnRecursiveExt,
+        Entity, Event, EventReader, EventWriter, GlobalTransform, IntoSystemConfigs, Plugin, Query,
+        Res, Transform, Update, Vec2, Visibility,
     },
     time::{Time, Timer, TimerMode},
 };
@@ -15,6 +15,8 @@ use bevy_rapier2d::{
         ActiveEvents, Collider, ColliderMassProperties, ExternalImpulse, RigidBody, Velocity,
     },
 };
+
+use crate::meta_states::PluginControlState;
 
 #[derive(Component)]
 pub struct Lifespan(Timer);
@@ -104,9 +106,12 @@ pub struct ProjectileImpactEvent {
 #[derive(Event)]
 pub struct ProjectileClashEvent(pub Entity, pub Entity);
 
-pub struct ProjectilePlugin;
+#[derive(Default)]
+pub struct ProjectilePlugin<T: PluginControlState> {
+    _z: PhantomData<T>,
+}
 
-impl Plugin for ProjectilePlugin {
+impl<T: PluginControlState> Plugin for ProjectilePlugin<T> {
     fn build(&self, app: &mut App) {
         app.add_event::<KnockbackEvent>();
         // .add_system(projectile_impact)
@@ -118,7 +123,8 @@ impl Plugin for ProjectilePlugin {
                 projectile_event_dispatcher,
                 kill_projectiles_post_impact,
                 knockback_from_projectiles,
-            ),
+            )
+                .run_if(in_state(T::active_state())),
         );
 
         app.add_event::<ProjectileImpactEvent>()
