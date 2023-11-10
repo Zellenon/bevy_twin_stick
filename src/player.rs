@@ -5,8 +5,9 @@ use crate::utils::*;
 use crate::weapons::{FireWeaponEvent, Weapon, WeaponFireMode};
 
 use bevy::prelude::{
-    in_state, App, Camera2dBundle, Children, Commands, Component, Entity, EventWriter, Input,
-    IntoSystemConfigs, MouseButton, Name, Plugin, Query, Res, Resource, Startup, Update, With,
+    default, in_state, App, Camera2dBundle, Children, Commands, Component, Entity, EventWriter,
+    Input, IntoSystemConfigs, MouseButton, Name, OrthographicProjection, Plugin, Query, Res,
+    Resource, Startup, Update, With,
 };
 use bevy::window::Window;
 use bevy_mod_transform2d::prelude::Spatial2dBundle;
@@ -48,7 +49,14 @@ impl<T: PluginControlState> Plugin for PlayerPlugin<T> {
 
 pub fn player_setup(mut commands: Commands) {
     let camera_entity = commands
-        .spawn(Camera2dBundle::default())
+        .spawn(Camera2dBundle {
+            projection: OrthographicProjection {
+                far: 1000.,
+                near: -1000.,
+                ..default()
+            },
+            ..Default::default()
+        })
         .insert(Name::new("Twin-Stick Player Camera"))
         .insert(Transform2d {
             z_translation: 100.,
