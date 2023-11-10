@@ -1,5 +1,8 @@
 use bevy::{
-    prelude::{Bundle, GlobalTransform, Handle, Image, Transform, Visibility},
+    prelude::{
+        Bundle, GlobalTransform, Handle, Image, InheritedVisibility, Transform, ViewVisibility,
+        Visibility,
+    },
     sprite::{Sprite, TextureAtlas, TextureAtlasSprite},
 };
 use bevy_mod_transform2d::transform2d::Transform2d;
@@ -12,6 +15,8 @@ pub struct Sprite2dBundle {
     pub global_transform: GlobalTransform,
     pub texture: Handle<Image>,
     pub visibility: Visibility,
+    pub inherited_visibility: InheritedVisibility,
+    pub view_visibility: ViewVisibility,
 }
 
 impl Default for Sprite2dBundle {
@@ -23,6 +28,8 @@ impl Default for Sprite2dBundle {
             global_transform: Default::default(),
             texture: Default::default(),
             visibility: Default::default(),
+            inherited_visibility: Default::default(),
+            view_visibility: Default::default(),
         }
     }
 }
@@ -41,4 +48,6 @@ pub struct SpriteSheet2dBundle {
     pub global_transform: GlobalTransform,
     /// User indication of whether an entity is visible
     pub visibility: Visibility,
+    pub inherited_visibility: InheritedVisibility,
+    pub view_visibility: ViewVisibility,
 }
