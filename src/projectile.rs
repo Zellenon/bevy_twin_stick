@@ -2,9 +2,9 @@ use std::{marker::PhantomData, time::Duration};
 
 use bevy::{
     prelude::{
-        in_state, App, Bundle, Commands, Component, ComputedVisibility, DespawnRecursiveExt,
-        Entity, Event, EventReader, EventWriter, GlobalTransform, IntoSystemConfigs, Plugin, Query,
-        Res, Transform, Update, Vec2, Visibility,
+        in_state, App, Bundle, Commands, Component, DespawnRecursiveExt, Entity, Event,
+        EventReader, EventWriter, GlobalTransform, IntoSystemConfigs, Plugin, Query, Res,
+        Transform, Update, Vec2, Visibility,
     },
     time::{Time, Timer, TimerMode},
 };
@@ -61,7 +61,6 @@ pub struct Knockback(pub f32);
 pub struct ProjectileBundle {
     pub projectile: Projectile,
     pub visibility: Visibility,
-    pub computed_visibility: ComputedVisibility,
     pub _transform: Transform,
     pub transform: Transform2d,
     pub global_transform: GlobalTransform,
@@ -77,7 +76,6 @@ impl Default for ProjectileBundle {
         Self {
             projectile: Projectile::default(),
             visibility: Visibility::Visible,
-            computed_visibility: ComputedVisibility::default(),
             velocity: Default::default(),
             transform: Default::default(),
             _transform: Default::default(),
