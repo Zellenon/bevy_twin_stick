@@ -1,4 +1,4 @@
-use bevy::ecs::schedule::States;
+use bevy::prelude::States;
 
 pub trait PluginControlState: Default + States + Send + Sync + 'static {
     fn active_state() -> Self;

@@ -4,9 +4,11 @@ use crate::meta_states::PluginControlState;
 use crate::utils::*;
 use crate::weapons::{FireWeaponEvent, Weapon, WeaponFireMode};
 
+use bevy::input::ButtonInput;
 use bevy::prelude::{
-    in_state, App, Camera2dBundle, Children, Commands, Component, Entity, EventWriter, Input,
-    IntoSystemConfigs, MouseButton, Name, Plugin, Query, Res, Resource, Startup, Update, With,
+    default, in_state, App, Camera2dBundle, Children, Commands, Component, Entity, EventWriter,
+    IntoSystemConfigs, MouseButton, Name, OrthographicProjection, Plugin, Query, Res, Resource,
+    Startup, Update, With,
 };
 use bevy::window::Window;
 use bevy_mod_transform2d::prelude::Spatial2dBundle;
@@ -87,7 +89,7 @@ pub fn player_exists(players: Query<(), With<Player>>) -> bool {
 }
 
 pub fn fire_player_weapons(
-    buttons: Res<Input<MouseButton>>,
+    buttons: Res<ButtonInput<MouseButton>>,
     mut events: EventWriter<FireWeaponEvent>,
     weapons: Query<(Entity, &Weapon)>,
     players_children_query: Query<&Children, With<Player>>,
@@ -105,7 +107,7 @@ pub fn fire_player_weapons(
                     events.send(FireWeaponEvent {
                         weapon: entity,
                         target: None,
-                    })
+                    });
                 }
             }
         }

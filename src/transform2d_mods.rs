@@ -1,7 +1,9 @@
 use bevy::{
-    prelude::{Bundle, ComputedVisibility, GlobalTransform, Handle, Image, Transform, Visibility},
-    render::texture::DEFAULT_IMAGE_HANDLE,
-    sprite::{Sprite, TextureAtlas, TextureAtlasSprite},
+    prelude::{
+        Bundle, GlobalTransform, Handle, Image, InheritedVisibility, Transform, ViewVisibility,
+        Visibility,
+    },
+    sprite::{Sprite, TextureAtlas},
 };
 use bevy_mod_transform2d::transform2d::Transform2d;
 
@@ -35,9 +37,10 @@ impl Default for Sprite2dBundle {
 #[derive(Bundle, Clone, Default)]
 pub struct SpriteSheet2dBundle {
     /// The specific sprite from the texture atlas to be drawn, defaulting to the sprite at index 0.
-    pub sprite: TextureAtlasSprite,
+    pub sprite: Sprite,
+    pub texture: Handle<Image>,
     /// A handle to the texture atlas that holds the sprite images
-    pub texture_atlas: Handle<TextureAtlas>,
+    pub atlas: TextureAtlas,
     /// Data pertaining to how the sprite is drawn on the screen
     pub _transform: Transform,
     pub transform: Transform2d,

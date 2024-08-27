@@ -93,7 +93,7 @@ pub fn fire_weapons(
         parent: Entity::from_raw(0),
         transforms,
     };
-    for FireWeaponEvent { weapon, target } in events.iter() {
+    for FireWeaponEvent { weapon, target } in events.read() {
         args.target = *target;
         args.parent = weapons.get(*weapon).unwrap().1.get();
         (*weapons.get(*weapon).unwrap().0.fire_func)(&mut args);
@@ -107,7 +107,7 @@ fn reset_weapon_cooldowns(
     for FireWeaponEvent {
         weapon: weapon_entity,
         target: _,
-    } in events.iter()
+    } in events.read()
     {
         let (mut weapon, mut cooldown) = weapon_query.get_mut(*weapon_entity).unwrap();
         weapon.can_fire = false;

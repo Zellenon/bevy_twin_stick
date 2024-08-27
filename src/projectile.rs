@@ -152,18 +152,24 @@ pub fn projectile_event_dispatcher(
     mut projectile_events: EventWriter<ProjectileImpactEvent>,
     mut clash_events: EventWriter<ProjectileClashEvent>,
 ) {
-    for collision_event in collision_events.iter() {
+    for collision_event in collision_events.read() {
         if let CollisionEvent::Started(e1, e2, _) = collision_event {
             match (projectile_query.get(*e1), projectile_query.get(*e2)) {
-                (Ok(_), Ok(_)) => clash_events.send(ProjectileClashEvent(*e1, *e2)),
-                (Ok(_), _) => projectile_events.send(ProjectileImpactEvent {
-                    projectile: *e1,
-                    impacted: *e2,
-                }),
-                (Err(_), Ok(_)) => projectile_events.send(ProjectileImpactEvent {
-                    impacted: *e1,
-                    projectile: *e2,
-                }),
+                (Ok(_), Ok(_)) => {
+                    clash_events.send(ProjectileClashEvent(*e1, *e2));
+                }
+                (Ok(_), _) => {
+                    projectile_events.send(ProjectileImpactEvent {
+                        projectile: *e1,
+                        impacted: *e2,
+                    });
+                }
+                (Err(_), Ok(_)) => {
+                    projectile_events.send(ProjectileImpactEvent {
+                        impacted: *e1,
+                        projectile: *e2,
+                    });
+                }
                 (Err(_), Err(_)) => continue,
             };
         }
@@ -179,7 +185,7 @@ fn knockback_from_projectiles(
     for ProjectileImpactEvent {
         projectile,
         impacted,
-    } in projectile_events.iter()
+    } in projectile_events.read()
     {
         if let Ok((Knockback(knockback), vel)) = projectiles.get(*projectile) {
             let hit_angle = positions.get(*projectile).unwrap().translation
@@ -191,7 +197,7 @@ fn knockback_from_projectiles(
                     None => hit_angle,
                 },
                 force: *knockback,
-            })
+            });
         }
     }
 }
@@ -204,7 +210,7 @@ fn kill_projectiles_post_impact(
     for ProjectileImpactEvent {
         projectile: projectile_id,
         impacted: _,
-    } in events.iter()
+    } in events.read()
     {
         let proj = query.get(*projectile_id);
         match proj {
@@ -226,7 +232,7 @@ fn knockback_events(
         entity,
         direction,
         force,
-    } in knockback_events.iter()
+    } in knockback_events.read()
     {
         let impulse_vector = Vec2::normalize(*direction) * *force;
         if let Ok(mut impulse) = target_query.get_mut(*entity) {

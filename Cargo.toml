@@ -7,7 +7,10 @@ readme = "README.md"
 
 
 [dependencies]
-bevy = {version = "0.11"}
-bevy_rapier2d = "0.22"
-bevy_mod_transform2d = { git = "https://github.com/Zellenon/bevy_mod_transform2d.git", features = ["bevy_rapier2d"] }
-bevy_turborand = "0.6"
+bevy = {version = "0.14"}
+bevy_rapier2d = "0.27"
+bevy_mod_transform2d = { git = "https://github.com/Zellenon/bevy_mod_transform2d.git", features = ["rapier"] }
+bevy_turborand = "0.9"
+
+[dev-dependencies]
+bevy-inspector-egui = "0.25"

@@ -1,11 +1,11 @@
 use bevy::{
     app::App,
+    prelude::Color,
     prelude::{
-        ClearColor, Commands, Input, KeyCode, Name, NextState, OnEnter, Res, ResMut, Startup,
+        ButtonInput, ClearColor, Commands, KeyCode, Name, NextState, OnEnter, Res, ResMut, Startup,
         State, States, Update,
     },
     reflect::Reflect,
-    render::color::Color,
     DefaultPlugins,
 };
 use bevy_rapier2d::prelude::RapierConfiguration;
@@ -46,7 +46,7 @@ pub fn main() -> Result<(), Box<dyn std::error::Error>> {
     app.add_systems(Startup, setup);
     app.add_systems(Update, toggle_pause);
 
-    app.insert_resource(ClearColor(Color::rgb(
+    app.insert_resource(ClearColor(Color::srgb(
         0xA9 as f32 / 255.0,
         0xA9 as f32 / 255.0,
         0xAF as f32 / 255.0,
@@ -61,7 +61,7 @@ fn setup(mut commands: Commands) {
         Player,
         Name::new("Player"),
         ActorBundle::default(),
-        Speed(1000.),
+        Speed(3000.),
         KeyboardAI,
     ));
 
@@ -71,13 +71,13 @@ fn setup(mut commands: Commands) {
             faction: Faction::FactionID(1),
             ..Default::default()
         },
-        Speed(200.),
+        Speed(1000.),
         PerlinWanderAI::new(0.4, 0.8, 0.01, 0.95),
     ));
 }
 
 pub(crate) fn toggle_pause(
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
     mut pause_state: ResMut<NextState<PauseState>>,
     current_pause_state: Res<State<PauseState>>,
 ) {

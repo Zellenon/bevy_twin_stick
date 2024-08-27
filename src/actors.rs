@@ -18,13 +18,13 @@ use crate::{
     stats::{Health, Speed},
 };
 
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Debug)]
 pub struct Actor {
     pub desired_direction: Vec2,
     pub desired_target: Option<Entity>,
 }
 
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Debug)]
 pub enum Faction {
     FactionID(usize),
     FriendlyToAll,
@@ -40,7 +40,7 @@ impl Default for Actor {
     }
 }
 
-#[derive(Bundle)]
+#[derive(Bundle, Debug)]
 pub struct ActorBundle {
     pub actor: Actor,
     pub faction: Faction,
@@ -69,7 +69,7 @@ impl Default for ActorBundle {
             _transform: Default::default(),
             global_transform: Default::default(),
             rigidbody: RigidBody::Dynamic,
-            mass_properties: ColliderMassProperties::Density(0.3),
+            mass_properties: ColliderMassProperties::Mass(1.),
             velocity: Default::default(),
             damping: Damping {
                 linear_damping: 20.,
@@ -84,13 +84,13 @@ impl Default for ActorBundle {
     }
 }
 
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Debug)]
 pub struct Tracking(pub Option<Entity>);
 
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Debug)]
 pub struct Head;
 
-#[derive(Component)]
+#[derive(Component, Reflect, Debug)]
 pub struct Legs {
     pub animation_stage: isize,
     pub stroke: isize,
@@ -107,13 +107,18 @@ impl Default for Legs {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Reflect, Debug)]
 pub struct ActorPlugin<T: PluginControlState> {
     _z: PhantomData<T>,
 }
 
 impl<T: PluginControlState> Plugin for ActorPlugin<T> {
     fn build(&self, app: &mut App) {
+        app.register_type::<Actor>()
+            .register_type::<Legs>()
+            .register_type::<Head>()
+            .register_type::<Tracking>();
+
         app.add_systems(
             Update,
             (facing_update_system, animate_legs, health_death).run_if(in_state(T::active_state())),
