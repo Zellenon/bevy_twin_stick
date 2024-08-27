@@ -3,9 +3,9 @@ use std::marker::PhantomData;
 use bevy::{
     math::Vec3Swizzles,
     prelude::{
-        in_state, App, Bundle, Changed, Commands, Component, ComputedVisibility,
-        DespawnRecursiveExt, Entity, GlobalTransform, IntoSystemConfigs, Parent, Plugin, Query,
-        Transform, Update, Vec2, Visibility, With, Without,
+        in_state, App, Bundle, Changed, Commands, Component, DespawnRecursiveExt, Entity,
+        GlobalTransform, InheritedVisibility, IntoSystemConfigs, Parent, Plugin, Query, Transform,
+        Update, Vec2, Visibility, With, Without,
     },
     reflect::Reflect,
 };
@@ -45,7 +45,7 @@ pub struct ActorBundle {
     pub actor: Actor,
     pub faction: Faction,
     pub visibility: Visibility,
-    pub computer_visibility: ComputedVisibility,
+    pub computer_visibility: InheritedVisibility,
     pub _transform: Transform,
     pub transform: Transform2d,
     pub global_transform: GlobalTransform,
