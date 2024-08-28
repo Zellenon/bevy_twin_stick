@@ -9,7 +9,7 @@ use bevy_turborand::{DelegatedRng, GlobalRng};
 
 use crate::actors::Actor;
 
-#[derive(Component, Debug, Reflect)]
+#[derive(Clone, Copy, PartialEq, Reflect, Debug, Component)]
 pub struct PerlinWanderAI {
     pub angle_delta: f32,
     pub strength_delta: f32,

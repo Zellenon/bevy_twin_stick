@@ -1,3 +1,4 @@
+use bevy::prelude::Reflect;
 use bevy::{
     input::ButtonInput,
     prelude::{Component, KeyCode, Query, Res, Vec2, With},
@@ -5,7 +6,7 @@ use bevy::{
 
 use crate::actors::Actor;
 
-#[derive(Component)]
+#[derive(Component, Clone, Copy, PartialEq, Eq, Reflect, Debug)]
 pub struct KeyboardAI;
 
 pub(crate) fn keyboard_input_handler(

@@ -1,10 +1,11 @@
+use bevy::prelude::Reflect;
 use bevy::prelude::States;
 
 pub trait PluginControlState: Default + States + Send + Sync + 'static {
     fn active_state() -> Self;
 }
 
-#[derive(States, Debug, Hash, Default, Eq, PartialEq, Clone)]
+#[derive(Clone, Copy, PartialEq, Eq, Reflect, Debug, States, Hash, Default)]
 pub(crate) enum DummyStates {
     #[default]
     AlwaysActive,

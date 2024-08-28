@@ -1,35 +1,38 @@
+use bevy::prelude::Reflect;
 use std::marker::PhantomData;
 
-use crate::meta_states::PluginControlState;
-use crate::utils::*;
-use crate::weapons::{FireWeaponEvent, Weapon, WeaponFireMode};
-
-use bevy::input::ButtonInput;
-use bevy::prelude::{
-    default, in_state, App, Camera2dBundle, Children, Commands, Component, Entity, EventWriter,
-    IntoSystemConfigs, MouseButton, Name, OrthographicProjection, Plugin, Query, Res, Resource,
-    Startup, Update, With,
+use crate::{
+    meta_states::PluginControlState,
+    utils::*,
+    weapons::{FireWeaponEvent, Weapon, WeaponFireMode},
 };
-use bevy::window::Window;
-use bevy_mod_transform2d::prelude::Spatial2dBundle;
-use bevy_mod_transform2d::transform2d::Transform2d;
 
-#[derive(Component, Resource)]
+use bevy::{
+    input::ButtonInput,
+    prelude::{
+        in_state, App, Camera2dBundle, Children, Commands, Component, Entity, EventWriter,
+        IntoSystemConfigs, MouseButton, Name, Plugin, Query, Res, Resource, Startup, Update, With,
+    },
+    window::Window,
+};
+use bevy_mod_transform2d::{prelude::Spatial2dBundle, transform2d::Transform2d};
+
+#[derive(Component, Resource, Clone, Copy, PartialEq, Eq, Reflect, Debug)]
 pub struct MainCamera(pub Entity);
 
-#[derive(Component)]
+#[derive(Component, Clone, Copy, PartialEq, Eq, Reflect, Debug)]
 pub struct TwinStickCamera;
 
-#[derive(Component)]
+#[derive(Component, Clone, Copy, PartialEq, Eq, Reflect, Debug)]
 pub struct CursorTracker;
 
-#[derive(Component, Resource)]
+#[derive(Component, Resource, Clone, Copy, PartialEq, Eq, Reflect, Debug)]
 pub struct Cursor(pub Entity);
 
-#[derive(Component)]
+#[derive(Component, Clone, Copy, PartialEq, Eq, Reflect, Debug)]
 pub struct Player;
 
-#[derive(Default)]
+#[derive(Default, Clone, Copy, PartialEq, Eq, Reflect, Debug)]
 pub struct PlayerPlugin<T: PluginControlState> {
     _z: PhantomData<T>,
 }

@@ -1,10 +1,8 @@
-use std::{marker::PhantomData, time::Duration};
-
 use bevy::{
     prelude::{
         in_state, App, Bundle, Commands, Component, DespawnRecursiveExt, Entity, Event,
         EventReader, EventWriter, GlobalTransform, InheritedVisibility, IntoSystemConfigs, Plugin,
-        Query, Res, Transform, Update, Vec2, Visibility,
+        Query, Reflect, Res, Transform, Update, Vec2, Visibility,
     },
     time::{Time, Timer, TimerMode},
 };
@@ -15,10 +13,11 @@ use bevy_rapier2d::{
         ActiveEvents, Collider, ColliderMassProperties, ExternalImpulse, RigidBody, Velocity,
     },
 };
+use std::{marker::PhantomData, time::Duration};
 
 use crate::meta_states::PluginControlState;
 
-#[derive(Component)]
+#[derive(Component, Clone, PartialEq, Eq, Reflect, Debug)]
 pub struct Lifespan(Timer);
 
 impl Lifespan {
@@ -33,13 +32,13 @@ impl Default for Lifespan {
     }
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Reflect, Debug)]
 pub enum ProjectileImpactBehavior {
     Die,
     Bounce,
 }
 
-#[derive(Component)]
+#[derive(Component, Clone, Copy, PartialEq, Eq, Reflect, Debug)]
 pub struct Projectile {
     pub on_hit: ProjectileImpactBehavior,
     pub on_impact: ProjectileImpactBehavior,
@@ -54,10 +53,10 @@ impl Default for Projectile {
     }
 }
 
-#[derive(Component)]
+#[derive(Component, Clone, Copy, PartialEq, Reflect, Debug)]
 pub struct Knockback(pub f32);
 
-#[derive(Bundle)]
+#[derive(Bundle, Clone, Debug)]
 pub struct ProjectileBundle {
     pub projectile: Projectile,
     pub visibility: Visibility,
@@ -90,23 +89,23 @@ impl Default for ProjectileBundle {
     }
 }
 
-#[derive(Event)]
+#[derive(Event, Clone, Copy, PartialEq, Reflect, Debug)]
 pub struct KnockbackEvent {
     entity: Entity,
     direction: Vec2,
     force: f32,
 }
 
-#[derive(Event)]
+#[derive(Event, Clone, Copy, PartialEq, Eq, Reflect, Debug)]
 pub struct ProjectileImpactEvent {
     pub projectile: Entity,
     pub impacted: Entity,
 }
 
-#[derive(Event)]
+#[derive(Clone, Copy, PartialEq, Eq, Reflect, Debug, Event)]
 pub struct ProjectileClashEvent(pub Entity, pub Entity);
 
-#[derive(Default)]
+#[derive(Clone, Copy, PartialEq, Eq, Reflect, Debug, Default)]
 pub struct ProjectilePlugin<T: PluginControlState> {
     _z: PhantomData<T>,
 }

@@ -1,13 +1,14 @@
 pub extern crate bevy_mod_transform2d;
 pub extern crate bevy_rapier2d;
 pub extern crate bevy_turborand;
-use std::marker::PhantomData;
 
 use bevy::{
     prelude::{App, AppExtStates, Plugin, ResMut, Startup, Vec2},
+    reflect::Reflect,
     state::state::FreelyMutableState,
 };
 use bevy_mod_transform2d::{transform2d::Transform2d, Transform2dPlugin};
+use std::marker::PhantomData;
 
 use bevy_rapier2d::prelude::{NoUserData, RapierConfiguration, RapierPhysicsPlugin};
 use bevy_turborand::prelude::RngPlugin;
@@ -32,6 +33,7 @@ pub mod utils;
 pub mod weapons;
 
 // Basically a convenience plugin you're expected to use until you refactor things to add TwinStickToggleablePlugin
+#[derive(Clone, Copy, PartialEq, Eq, Reflect, Debug)]
 pub struct TwinStickPlugin;
 
 impl Plugin for TwinStickPlugin {

@@ -1,5 +1,3 @@
-use std::marker::PhantomData;
-
 use bevy::{
     math::Vec3Swizzles,
     prelude::{
@@ -11,6 +9,7 @@ use bevy::{
 };
 use bevy_mod_transform2d::transform2d::Transform2d;
 use bevy_rapier2d::prelude::*;
+use std::marker::PhantomData;
 
 use crate::{
     meta_states::PluginControlState,
@@ -18,13 +17,13 @@ use crate::{
     stats::{Health, Speed},
 };
 
-#[derive(Component, Reflect, Debug)]
+#[derive(Clone, Copy, PartialEq, Reflect, Debug, Component)]
 pub struct Actor {
     pub desired_direction: Vec2,
     pub desired_target: Option<Entity>,
 }
 
-#[derive(Component, Reflect, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Reflect, Debug, Component)]
 pub enum Faction {
     FactionID(usize),
     FriendlyToAll,
@@ -40,7 +39,7 @@ impl Default for Actor {
     }
 }
 
-#[derive(Bundle, Debug)]
+#[derive(Clone, Debug, Bundle)]
 pub struct ActorBundle {
     pub actor: Actor,
     pub faction: Faction,
@@ -72,7 +71,7 @@ impl Default for ActorBundle {
             mass_properties: ColliderMassProperties::Mass(1.),
             velocity: Default::default(),
             damping: Damping {
-                linear_damping: 20.,
+                linear_damping: 12.,
                 angular_damping: 1.0,
             },
             external_force: Default::default(),
@@ -84,13 +83,13 @@ impl Default for ActorBundle {
     }
 }
 
-#[derive(Component, Reflect, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Reflect, Debug, Component)]
 pub struct Tracking(pub Option<Entity>);
 
-#[derive(Component, Reflect, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Reflect, Debug, Component)]
 pub struct Head;
 
-#[derive(Component, Reflect, Debug)]
+#[derive(Clone, Copy, PartialEq, Reflect, Debug, Component)]
 pub struct Legs {
     pub animation_stage: isize,
     pub stroke: isize,
@@ -107,7 +106,7 @@ impl Default for Legs {
     }
 }
 
-#[derive(Default, Reflect, Debug)]
+#[derive(Default, Reflect, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ActorPlugin<T: PluginControlState> {
     _z: PhantomData<T>,
 }

@@ -1,9 +1,10 @@
+use bevy::prelude::Reflect;
 use bevy::prelude::{Component, Query, With};
 use bevy_mod_transform2d::transform2d::Transform2d;
 
 use crate::{actors::Actor, player::Player};
 
-#[derive(Component)]
+#[derive(Component, Clone, Copy, PartialEq, Reflect, Debug)]
 pub struct TrackerAI {
     pub precision: f32,
 }

@@ -1,13 +1,12 @@
 use bevy::{
     prelude::{
-        Bundle, GlobalTransform, Handle, Image, InheritedVisibility, Transform, ViewVisibility,
-        Visibility,
+        Bundle, GlobalTransform, Handle, Image, InheritedVisibility, Reflect, Transform, Visibility,
     },
     sprite::{Sprite, TextureAtlas},
 };
 use bevy_mod_transform2d::transform2d::Transform2d;
 
-#[derive(Bundle, Clone)]
+#[derive(Clone, Reflect, Debug, Bundle)]
 pub struct Sprite2dBundle {
     pub sprite: Sprite,
     pub transform: Transform2d,
@@ -34,7 +33,7 @@ impl Default for Sprite2dBundle {
 
 /// A Bundle of components for drawing a single sprite from a sprite sheet (also referred
 /// to as a `TextureAtlas`)
-#[derive(Bundle, Clone, Default)]
+#[derive(Clone, Reflect, Debug, Bundle, Default)]
 pub struct SpriteSheet2dBundle {
     /// The specific sprite from the texture atlas to be drawn, defaulting to the sprite at index 0.
     pub sprite: Sprite,
