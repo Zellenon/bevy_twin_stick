@@ -1,16 +1,15 @@
-use std::marker::PhantomData;
-
 use bevy::{
     math::Vec3Swizzles,
     prelude::{
-        in_state, App, Bundle, Changed, Commands, Component, ComputedVisibility,
-        DespawnRecursiveExt, Entity, GlobalTransform, IntoSystemConfigs, Parent, Plugin, Query,
-        Transform, Update, Vec2, Visibility, With, Without,
+        in_state, App, Bundle, Changed, Commands, Component, DespawnRecursiveExt, Entity,
+        GlobalTransform, InheritedVisibility, IntoSystemConfigs, Parent, Plugin, Query, Transform,
+        Update, Vec2, Visibility, With, Without,
     },
     reflect::Reflect,
 };
 use bevy_mod_transform2d::transform2d::Transform2d;
 use bevy_rapier2d::prelude::*;
+use std::marker::PhantomData;
 
 use crate::{
     meta_states::PluginControlState,
@@ -18,13 +17,13 @@ use crate::{
     stats::{Health, Speed},
 };
 
-#[derive(Component, Reflect)]
+#[derive(Clone, Copy, PartialEq, Reflect, Debug, Component)]
 pub struct Actor {
     pub desired_direction: Vec2,
     pub desired_target: Option<Entity>,
 }
 
-#[derive(Component, Reflect)]
+#[derive(Clone, Copy, PartialEq, Eq, Reflect, Debug, Component)]
 pub enum Faction {
     FactionID(usize),
     FriendlyToAll,
@@ -40,12 +39,12 @@ impl Default for Actor {
     }
 }
 
-#[derive(Bundle)]
+#[derive(Clone, Debug, Bundle)]
 pub struct ActorBundle {
     pub actor: Actor,
     pub faction: Faction,
     pub visibility: Visibility,
-    pub computer_visibility: ComputedVisibility,
+    pub computer_visibility: InheritedVisibility,
     pub _transform: Transform,
     pub transform: Transform2d,
     pub global_transform: GlobalTransform,
@@ -69,10 +68,10 @@ impl Default for ActorBundle {
             _transform: Default::default(),
             global_transform: Default::default(),
             rigidbody: RigidBody::Dynamic,
-            mass_properties: ColliderMassProperties::Density(0.3),
+            mass_properties: ColliderMassProperties::Mass(1.),
             velocity: Default::default(),
             damping: Damping {
-                linear_damping: 20.,
+                linear_damping: 12.,
                 angular_damping: 1.0,
             },
             external_force: Default::default(),
@@ -84,13 +83,13 @@ impl Default for ActorBundle {
     }
 }
 
-#[derive(Component, Reflect)]
+#[derive(Clone, Copy, PartialEq, Eq, Reflect, Debug, Component)]
 pub struct Tracking(pub Option<Entity>);
 
-#[derive(Component, Reflect)]
+#[derive(Clone, Copy, PartialEq, Eq, Reflect, Debug, Component)]
 pub struct Head;
 
-#[derive(Component)]
+#[derive(Clone, Copy, PartialEq, Reflect, Debug, Component)]
 pub struct Legs {
     pub animation_stage: isize,
     pub stroke: isize,
@@ -107,13 +106,18 @@ impl Default for Legs {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Reflect, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ActorPlugin<T: PluginControlState> {
     _z: PhantomData<T>,
 }
 
 impl<T: PluginControlState> Plugin for ActorPlugin<T> {
     fn build(&self, app: &mut App) {
+        app.register_type::<Actor>()
+            .register_type::<Legs>()
+            .register_type::<Head>()
+            .register_type::<Tracking>();
+
         app.add_systems(
             Update,
             (facing_update_system, animate_legs, health_death).run_if(in_state(T::active_state())),

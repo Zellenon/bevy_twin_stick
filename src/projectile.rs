@@ -1,10 +1,8 @@
-use std::{marker::PhantomData, time::Duration};
-
 use bevy::{
     prelude::{
-        in_state, App, Bundle, Commands, Component, ComputedVisibility, DespawnRecursiveExt,
-        Entity, Event, EventReader, EventWriter, GlobalTransform, IntoSystemConfigs, Plugin, Query,
-        Res, Transform, Update, Vec2, Visibility,
+        in_state, App, Bundle, Commands, Component, DespawnRecursiveExt, Entity, Event,
+        EventReader, EventWriter, GlobalTransform, InheritedVisibility, IntoSystemConfigs, Plugin,
+        Query, Reflect, Res, Transform, Update, Vec2, Visibility,
     },
     time::{Time, Timer, TimerMode},
 };
@@ -15,10 +13,11 @@ use bevy_rapier2d::{
         ActiveEvents, Collider, ColliderMassProperties, ExternalImpulse, RigidBody, Velocity,
     },
 };
+use std::{marker::PhantomData, time::Duration};
 
 use crate::meta_states::PluginControlState;
 
-#[derive(Component)]
+#[derive(Component, Clone, PartialEq, Eq, Reflect, Debug)]
 pub struct Lifespan(Timer);
 
 impl Lifespan {
@@ -33,13 +32,13 @@ impl Default for Lifespan {
     }
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Reflect, Debug)]
 pub enum ProjectileImpactBehavior {
     Die,
     Bounce,
 }
 
-#[derive(Component)]
+#[derive(Component, Clone, Copy, PartialEq, Eq, Reflect, Debug)]
 pub struct Projectile {
     pub on_hit: ProjectileImpactBehavior,
     pub on_impact: ProjectileImpactBehavior,
@@ -54,14 +53,14 @@ impl Default for Projectile {
     }
 }
 
-#[derive(Component)]
+#[derive(Component, Clone, Copy, PartialEq, Reflect, Debug)]
 pub struct Knockback(pub f32);
 
-#[derive(Bundle)]
+#[derive(Bundle, Clone, Debug)]
 pub struct ProjectileBundle {
     pub projectile: Projectile,
     pub visibility: Visibility,
-    pub computed_visibility: ComputedVisibility,
+    pub computed_visibility: InheritedVisibility,
     pub _transform: Transform,
     pub transform: Transform2d,
     pub global_transform: GlobalTransform,
@@ -77,7 +76,7 @@ impl Default for ProjectileBundle {
         Self {
             projectile: Projectile::default(),
             visibility: Visibility::Visible,
-            computed_visibility: ComputedVisibility::default(),
+            computed_visibility: InheritedVisibility::default(),
             velocity: Default::default(),
             transform: Default::default(),
             _transform: Default::default(),
@@ -90,23 +89,23 @@ impl Default for ProjectileBundle {
     }
 }
 
-#[derive(Event)]
+#[derive(Event, Clone, Copy, PartialEq, Reflect, Debug)]
 pub struct KnockbackEvent {
     entity: Entity,
     direction: Vec2,
     force: f32,
 }
 
-#[derive(Event)]
+#[derive(Event, Clone, Copy, PartialEq, Eq, Reflect, Debug)]
 pub struct ProjectileImpactEvent {
     pub projectile: Entity,
     pub impacted: Entity,
 }
 
-#[derive(Event)]
+#[derive(Clone, Copy, PartialEq, Eq, Reflect, Debug, Event)]
 pub struct ProjectileClashEvent(pub Entity, pub Entity);
 
-#[derive(Default)]
+#[derive(Clone, Copy, PartialEq, Eq, Reflect, Debug, Default)]
 pub struct ProjectilePlugin<T: PluginControlState> {
     _z: PhantomData<T>,
 }
@@ -152,18 +151,24 @@ pub fn projectile_event_dispatcher(
     mut projectile_events: EventWriter<ProjectileImpactEvent>,
     mut clash_events: EventWriter<ProjectileClashEvent>,
 ) {
-    for collision_event in collision_events.iter() {
+    for collision_event in collision_events.read() {
         if let CollisionEvent::Started(e1, e2, _) = collision_event {
             match (projectile_query.get(*e1), projectile_query.get(*e2)) {
-                (Ok(_), Ok(_)) => clash_events.send(ProjectileClashEvent(*e1, *e2)),
-                (Ok(_), _) => projectile_events.send(ProjectileImpactEvent {
-                    projectile: *e1,
-                    impacted: *e2,
-                }),
-                (Err(_), Ok(_)) => projectile_events.send(ProjectileImpactEvent {
-                    impacted: *e1,
-                    projectile: *e2,
-                }),
+                (Ok(_), Ok(_)) => {
+                    clash_events.send(ProjectileClashEvent(*e1, *e2));
+                }
+                (Ok(_), _) => {
+                    projectile_events.send(ProjectileImpactEvent {
+                        projectile: *e1,
+                        impacted: *e2,
+                    });
+                }
+                (Err(_), Ok(_)) => {
+                    projectile_events.send(ProjectileImpactEvent {
+                        impacted: *e1,
+                        projectile: *e2,
+                    });
+                }
                 (Err(_), Err(_)) => continue,
             };
         }
@@ -179,7 +184,7 @@ fn knockback_from_projectiles(
     for ProjectileImpactEvent {
         projectile,
         impacted,
-    } in projectile_events.iter()
+    } in projectile_events.read()
     {
         if let Ok((Knockback(knockback), vel)) = projectiles.get(*projectile) {
             let hit_angle = positions.get(*projectile).unwrap().translation
@@ -191,7 +196,7 @@ fn knockback_from_projectiles(
                     None => hit_angle,
                 },
                 force: *knockback,
-            })
+            });
         }
     }
 }
@@ -204,7 +209,7 @@ fn kill_projectiles_post_impact(
     for ProjectileImpactEvent {
         projectile: projectile_id,
         impacted: _,
-    } in events.iter()
+    } in events.read()
     {
         let proj = query.get(*projectile_id);
         match proj {
@@ -226,7 +231,7 @@ fn knockback_events(
         entity,
         direction,
         force,
-    } in knockback_events.iter()
+    } in knockback_events.read()
     {
         let impulse_vector = Vec2::normalize(*direction) * *force;
         if let Ok(mut impulse) = target_query.get_mut(*entity) {

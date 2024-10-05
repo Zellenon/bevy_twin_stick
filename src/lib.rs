@@ -1,10 +1,14 @@
 pub extern crate bevy_mod_transform2d;
 pub extern crate bevy_rapier2d;
 pub extern crate bevy_turborand;
-use std::marker::PhantomData;
 
-use bevy::prelude::{App, Plugin, ResMut, Startup, Vec2};
+use bevy::{
+    prelude::{App, AppExtStates, Plugin, ResMut, Startup, Vec2},
+    reflect::Reflect,
+    state::state::FreelyMutableState,
+};
 use bevy_mod_transform2d::{transform2d::Transform2d, Transform2dPlugin};
+use std::marker::PhantomData;
 
 use bevy_rapier2d::prelude::{NoUserData, RapierConfiguration, RapierPhysicsPlugin};
 use bevy_turborand::prelude::RngPlugin;
@@ -46,11 +50,20 @@ impl<T: PluginControlState> Default for TwinStickToggleablePlugin<T> {
     }
 }
 
-impl<T: PluginControlState> Plugin for TwinStickToggleablePlugin<T> {
+impl<T: PluginControlState> TwinStickToggleablePlugin<T> {
+    pub fn use_default_camera(self, use_cam: bool) -> Self {
+        return TwinStickToggleablePlugin {
+            use_default_camera: use_cam,
+            ..self
+        };
+    }
+}
+
+impl<T: PluginControlState + FreelyMutableState> Plugin for TwinStickToggleablePlugin<T> {
     fn build(&self, app: &mut App) {
-        app.add_state::<T>();
+        app.init_state::<T>();
         app.add_plugins((
-            RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(50.),
+            RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.),
             RngPlugin::default(),
         ));
 

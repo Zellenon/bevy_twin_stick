@@ -1,3 +1,4 @@
+use bevy::prelude::Reflect;
 use std::marker::PhantomData;
 
 use bevy::{
@@ -11,6 +12,7 @@ use bevy_mod_transform2d::transform2d::Transform2d;
 
 use crate::{meta_states::PluginControlState, player::CursorTracker};
 
+#[derive(Clone, Copy, PartialEq, Eq, Reflect, Debug)]
 pub struct WeaponPlugin<T: PluginControlState> {
     _z: PhantomData<T>,
 }
@@ -40,11 +42,11 @@ impl<T: PluginControlState> Plugin for WeaponPlugin<T> {
 #[derive(Component)]
 pub struct Weapon {
     pub can_fire: bool,
-    pub fire_mode: WeaponFireMode,
     pub fire_func: Box<dyn Fn(&mut WeaponArguments) + Send + Sync>,
+    pub fire_mode: WeaponFireMode,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Reflect, Debug)]
 pub enum WeaponFireMode {
     SemiAuto,
     FullAuto,
@@ -58,7 +60,7 @@ pub struct WeaponArguments<'c, 'w, 's, 'c2, 'w2, 's2> {
     pub transforms: Query<'c2, 'w2, &'s2 Transform2d>,
 }
 
-#[derive(Component)]
+#[derive(Clone, PartialEq, Reflect, Debug, Component)]
 pub struct Cooldown {
     pub max: f32,
     pub timer: Timer,
@@ -73,7 +75,7 @@ impl Cooldown {
     }
 }
 
-#[derive(Event)]
+#[derive(Clone, Copy, PartialEq, Eq, Reflect, Debug, Event)]
 pub struct FireWeaponEvent {
     pub weapon: Entity,
     pub target: Option<Entity>,
@@ -93,7 +95,7 @@ pub fn fire_weapons(
         parent: Entity::from_raw(0),
         transforms,
     };
-    for FireWeaponEvent { weapon, target } in events.iter() {
+    for FireWeaponEvent { weapon, target } in events.read() {
         args.target = *target;
         args.parent = weapons.get(*weapon).unwrap().1.get();
         (*weapons.get(*weapon).unwrap().0.fire_func)(&mut args);
@@ -107,7 +109,7 @@ fn reset_weapon_cooldowns(
     for FireWeaponEvent {
         weapon: weapon_entity,
         target: _,
-    } in events.iter()
+    } in events.read()
     {
         let (mut weapon, mut cooldown) = weapon_query.get_mut(*weapon_entity).unwrap();
         weapon.can_fire = false;

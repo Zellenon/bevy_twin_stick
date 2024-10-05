@@ -1,3 +1,4 @@
+use bevy::prelude::Reflect;
 use bevy::prelude::{App, IntoSystemConfigs, Plugin, Query, Update};
 
 use crate::{
@@ -15,6 +16,7 @@ pub mod keyboard;
 pub mod tracking;
 pub mod wander;
 
+#[derive(Clone, Copy, PartialEq, Eq, Reflect, Debug)]
 pub struct AIPlugin;
 
 impl Plugin for AIPlugin {

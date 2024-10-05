@@ -1,8 +1,9 @@
-use bevy::prelude::{Entity, IntoSystemConfigs, Plugin, Query, Res, Update, With};
+use bevy::prelude::{Entity, IntoSystemConfigs, Plugin, Query, Reflect, Res, Update, With};
 use bevy_mod_transform2d::transform2d::Transform2d;
 
 use crate::player::{player_exists, CursorTracker, MainCamera, Player};
 
+#[derive(Clone, Copy, PartialEq, Eq, Reflect, Debug)]
 pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
