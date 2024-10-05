@@ -16,7 +16,7 @@ use camera::CameraPlugin;
 use meta_states::PluginControlState;
 use stats::{Health, Knockback, Speed};
 
-use self::{
+pub use self::{
     actors::ActorPlugin, ai::AIPlugin, meta_states::DummyStates, player::PlayerPlugin,
     projectile::ProjectilePlugin, weapons::WeaponPlugin,
 };
