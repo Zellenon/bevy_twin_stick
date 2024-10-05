@@ -28,13 +28,8 @@ pub mod transform2d_mods;
 pub mod utils;
 pub mod weapons;
 
-// Basically a convenience plugin you're expected to use until you refactor things to add TwinStickToggleablePlugin
-pub struct TwinStickPlugin;
-
-impl Plugin for TwinStickPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_plugins(TwinStickToggleablePlugin::<DummyStates>::default());
-    }
+pub fn TwinStickPlugin() -> TwinStickToggleablePlugin<DummyStates> {
+    TwinStickToggleablePlugin::<DummyStates>::default()
 }
 
 pub struct TwinStickToggleablePlugin<T: PluginControlState> {
